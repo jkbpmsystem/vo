@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VO — Sistem Pendaftaran Aset</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0c0c1d;--card:#141428;--surface:#0f0f23;--accent:#f97316;--glow:#f9731633;--text:#e2e8f0;--muted:#64748b;--dim:#334155;--border:#ffffff0a;--green:#4ade80;--red:#f87171;--blue:#60a5fa;--yellow:#fbbf24}
+    body{font-family:'DM Sans',sans-serif;background:radial-gradient(ellipse at 20% 0%,#1e1638,var(--bg) 50%),var(--bg);color:var(--text);min-height:100vh}
+    @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}@keyframes fadeUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}@keyframes slideT{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+    select option{background:var(--surface);color:var(--text)}::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#33415544;border-radius:3px}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)!important}
+    .rh:hover{background:#f9731608!important}
+    .btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:10px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;font-family:inherit}.btn:hover{filter:brightness(1.15)}
+    .bp{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 3px 12px var(--glow)}.bg{background:#64748b10;color:var(--muted);border:1px solid #33415533}.bd{background:#dc2626;color:#fff}
+    .fi{width:100%;padding:9px 11px;border-radius:9px;font-size:12.5px;border:1px solid #33415533;background:var(--surface);color:var(--text);outline:none;font-family:inherit}
+    .lb{display:block;font-size:9.5px;font-weight:700;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.7px}
+    .glass{background:#141428ee;border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(20px)}
+    .badge{display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:20px;font-size:9px;font-weight:700}
+    .by{background:#052e16;color:var(--green);border:1px solid #16a34a33}.bn{background:#2a0a0a;color:var(--red);border:1px solid #dc262633}
+    table{width:100%;border-collapse:collapse}th{text-align:left;padding:7px 8px;font-weight:800;font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);background:#0f0f2399;white-space:nowrap;position:sticky;top:0;z-index:2}
+    td{padding:7px 8px;border-bottom:1px solid var(--border);font-size:11px}
+    .ov{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:999}
+    .md{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:400px;width:92%;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+    .tst{position:fixed;bottom:20px;right:20px;color:#fff;padding:10px 20px;border-radius:10px;font-size:12px;font-weight:700;box-shadow:0 8px 25px rgba(0,0,0,.5);z-index:1000;animation:slideT .3s ease}
+    .mono{font-family:'JetBrains Mono',monospace}.tag{background:#f9731612;color:var(--accent);padding:1px 7px;border-radius:5px;font-size:9px;font-weight:600;white-space:nowrap}
+    .el{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tb{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+    .sb{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid #33415522;border-radius:9px;padding:7px 12px;flex:1;min-width:140px}
+    .sb input{border:none;outline:none;background:transparent;color:var(--text);font-size:12px;width:100%;font-family:inherit}
+    .st{padding:4px 10px;border-radius:7px;background:var(--surface);font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px}
+    .ds{margin-top:16px;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f9731608,var(--surface));border:1px solid #f9731618}
+    .lb-bar{height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:pulse 1s ease-in-out infinite}
+    .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+    .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+    .g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+    .af{font-size:8px;color:var(--accent);margin-top:1px;font-style:italic}
+    .st2{font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1.3px;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid #f9731620}
+    .tw{overflow-x:auto;max-height:calc(100vh - 200px)}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useMemo}=React;
+
+// ── Location Master (key entries) ───────────────────────────
+const LM={"L1-MEL-001":"Main Lobby & Entrance","L1-MEL-002":"Counter Reception","L1-MEL-008":"Retail Pharmacy","L1-MEL-023":"Main Control & Security Room","L1-MSU-001":"Waiting Area","L1-MSU-002":"Reception Counter","L1-PRU-001":"Waiting Area","L1-ARC-001":"Waiting Area","L1-ARC-002":"Admission/Revenue Counter","L1-IMG-001":"Main Registration Counter","L1-IMG-003":"Main Waiting Area","L1-IMG-022":"MRI Examination Room","L1-IMG-029":"CT Scan Examination Room","L1-IMG-038":"General X-ray Room 1","L1-IMG-062":"Angiography Room","L1-IMG-075":"Mammography Room","L1-IMG-080":"Ultrasound Room 1","L1-IMG-089":"Fluoroscopy Room","L1-IMG-098":"PACS Server Room","L1-IMG-100":"Bone Densitometry Room","L1-IMG-101":"Head of Department","L1-ED-010":"Waiting area","L1-ED-011":"Registration Counter","L1-ED-040":"Primary Triage","L1-ED-042":"Resus Room 1","L1-ED-043":"Resus Room 2","L1-ED-089":"Sterile Minor OT","L1-ED-094":"Major Trauma OT","L1-ED-103":"Isolation Room","L1-ED-117":"Head of Department","L1-ED-172A":"Hyperbaric Chamber","L1-PAC-001":"Registration Counter","L1-PAC-009":"Emergency Delivery Room","L1-OPD-001":"Waiting Area","L1-OPD-002":"Dispensing Counter","L1-AUD-003":"Auditorium","L1-RHB-001":"Waiting area","L1-RHB-007":"General Gymnasium","L1-RHB-012":"Hydro therapy Pool","L1-CPS-001":"Sorting Area","L1-CPS-014":"Issuing Counter","L1-IPD-011":"Processing Area","L1-IPD-027":"TPN Room (Sterile)","L1-DIET-019":"Cooking Area","L1-MOR-028":"Post Mortem Room 1","L1-MOR-034":"CT Scan Room","L1-MOR-041":"Freezer Area","L1-IBS-001":"Loading Bay","L1-BEM-001":"Waiting Area","L1-BEM-020":"Workshop CIVIL","L1-BEM-021":"Workshop MECHANICAL","L1-BEM-022":"Workshop ELECTRICAL","L1-BEM-032":"Control Room","L1-LSU-001":"Loading Bay (clean)","L1-HKS-001":"Washing Area","L1-TPS-001":"Reception","L1-WMU-001":"Waste Control Office","L2-OGP-001":"Waiting Area (O&G/Paed)","L2-GMC-001":"Waiting Area (MSC/FMC)","L2-EOC-001":"Waiting Area (Opthal/ENT)","L2-PSC-001":"Waiting Area","L2-OSC-001":"Waiting Area","L2-CEW-001":"Reception Hall","L2-CEW-007":"Open Ward","L2-CEW-019":"Central Nurse Station","L2-MDL-001":"Waiting Area","L2-MDL-042":"Working Area","L2-IT-001":"Waiting Area","L2-IT-004":"Server Room","L2-MR-001":"Waiting Area","L3-OT-007":"OT 1 (Future)","L3-OT-021":"OT 5 (Neuro)","L3-OT-026":"OT 6 (Ortho)","L3-OT-028":"OT 7 (Surgical)","L3-OT-035":"OT 9 (Emergency)","L3-OT-042":"OT 11 (ENT)","L3-OT-047":"OT 12 (Opthal)","L3-OT-052":"Recovery Bay","L3-SED-013":"Endoscopy Room 2","L3-SED-015":"Endoscopy Room 1","L3-SED-017":"ERCP Suite","L3-CIC-007":"ICU Cubicle","L3-CIC-014":"HDW Cubicle","L3-CIC-016":"CCU Cubicle","L3-CIC-017":"PICU Cubicle","L3-CSSD-001":"Dirty Zone","L3-CSSD-010":"Clean Zone","L3-CSSD-026":"Autoclave (Sterile)","L3-LDS-008":"Delivery Room 1","L3-MOT-006":"Mat OT 1","L3-MOT-009":"Mat OT 2","L3-NICU-008":"NICU Bays","L3-NICU-014":"SCN","L3-SW1-007":"Nurse Station","L3-OW-009":"Nurse Station","L4-OCC-001":"Reception","L4-M&A-003":"Director Room","L4-MW1-007":"Nurse Station","L4-MW2-007":"Nurse Station","L4-MPD-001":"Waiting Area","L5-SW2-007":"Nurse Station","L5-PW-007":"Nurse Station","L6-RW-003":"Nurse Station","L6-RW-004":"Royal Suite"};
+
+const DM={"MEL":"PUBLIC AMENITIES L1","MSU":"MEDICAL SOCIAL UNIT","PRU":"PUBLIC RELATION UNIT","ARC":"ADMISSION & REVENUE","IMG":"IMAGING DEPT","ED":"EMERGENCY DEPT","PAC":"O&G ADMISSION/PAC","OPD":"OUTPATIENT PHARMACY","AUD":"AUDITORIUM","RHB":"REHABILITATION","CPS":"CENTRAL PHARMACY STORE","IPD":"INPATIENT PHARMACY","DIET":"DIETETICS/KITCHEN","MOR":"MORTUARY","IBS":"BIOMEDICAL STORE","BEM":"BEM SERVICES","LSU":"LINEN SUPPLIES","HKS":"HOUSEKEEPING","TPS":"TRANSPORT & PORTERAGE","SS":"SECURITY","WMU":"WASTE MANAGEMENT","OGP":"O&G & PAED CLINIC","GMC":"GENERAL MEDICAL CLINIC","EOC":"ENT & OPTHAL CLINIC","PSC":"PSYCHIATRIC CLINIC","OSC":"ORTHO & SURGICAL CLINIC","CEW":"CLINICAL EXAM WARD","CEA":"CLINICAL EXAM AREA","HOS":"HOD SHARED","HOU":"HEAD OF UNIT","MDL":"MEDICAL DIAGNOSTIC LAB","IT":"IT DEPARTMENT","MR":"MEDICAL RECORD","PA":"PUBLIC AMENITIES","OT":"OPERATION THEATRE","SED":"SURGICAL & ENDO DAYCARE","CIC":"CENTRALIZED ICU","CSSD":"CSSD","RHU":"RESP. HAEMODYNAMIC","LDS":"LABOUR & DELIVERY","MOT":"MATERNITY OT","NICU":"NEONATAL ICU","SFW":"SHARED FACILITIES WARD","SW1":"SURGICAL WARD 1","SW2":"SURGICAL WARD 2","OW":"OBSTETRIC WARD","OCC":"ON CALL COMPLEX","SFA":"SHARED ADMIN","M&A":"MANAGEMENT & ADMIN","FU":"FINANCE UNIT","HR":"HUMAN RESOURCE","MW1":"MEDICAL WARD 1","MW2":"MEDICAL WARD 2","MPD":"MED & PAED DAYCARE","PW":"PAEDIATRIC WARD","RW":"ROYAL WARD","SFT":"SHARED TEACHING"};
+
+const EM={"MEC010101":{"d":"A/C CHILLER CENTRIFUGAL","t":"M40402"},"MEC010201":{"d":"A/C COOLING TOWER","t":"M40332"},"MEC010301":{"d":"AIR HANDLING UNIT","t":"M40112"},"MEC010401":{"d":"FAN COIL UNIT","t":"M40122"},"MEC010701":{"d":"SPLIT UNIT","t":"M40132"},"MEC020101":{"d":"EXHAUST FAN","t":"M81104"},"MEC060106":{"d":"OXYGEN VIE TANK","t":"M49406"},"MEC060202":{"d":"MEDICAL AIR COMPRESSOR","t":"M49002"},"MEC060404":{"d":"VACUUM PUMP","t":"M49125"},"MEC070102":{"d":"FIRE ALARM PANEL MAIN","t":"M56014"},"MEC070400":{"d":"FIRE SPRINKLER SYSTEM","t":"M56025"},"MEC180103":{"d":"BOILER OIL FIRED","t":"M73004"},"MEC190101":{"d":"AUTOCLAVE","t":"M75062"},"MEC200501":{"d":"ELEVATOR BEDS","t":"M83112"},"MEC200503":{"d":"ELEVATOR PASSENGER","t":"M83112"},"ELC090107":{"d":"GENERATOR SET","t":"E31011"},"ELC090210":{"d":"MV TRANSFORMER","t":"E31136"},"ELC090301":{"d":"LV MAIN BOARD","t":"E31216"},"ELC210100":{"d":"CCTV SYSTEM","t":"E39014"},"ELC060401":{"d":"NURSE CALL SYSTEM","t":"E24214"},"ELC010101":{"d":"A/C SWITCHBOARD","t":"E09225"},"ELC090402":{"d":"UPS BATTERY","t":"E31315"},"ELC180101":{"d":"LIGHTNING ARRESTOR","t":"E35016"},"10-134":{"d":"ANESTHESIA UNITS","t":"10134-000"},"11-134":{"d":"DEFIBRILLATORS","t":"11134-000"},"11-218":{"d":"HEMODIALYSIS","t":"11218-000"},"12-113":{"d":"INCUBATOR INFANT","t":"12113-000"},"12-282":{"d":"SURGICAL LIGHT","t":"12282-000"},"12-647":{"d":"PATIENT MONITOR","t":"12647-000"},"13-215":{"d":"INFUSION PUMP","t":"13215-000"},"13-217":{"d":"SYRINGE PUMP","t":"13217-000"},"13-469":{"d":"CT SCAN","t":"13469-000"},"13-961":{"d":"OPERATING TABLE","t":"13961-000"},"14-361":{"d":"VENTILATOR NEONATAL","t":"14361-000"},"14-437":{"d":"REVERSE OSMOSIS","t":"14437-003"},"15-976":{"d":"ULTRASOUND GENERAL","t":"15976-000"},"17-148":{"d":"PULSE OXIMETER","t":"17148-000"},"17-429":{"d":"VENTILATOR ICU","t":"17429-000"},"17-433":{"d":"INFANT WARMER MOBILE","t":"17433-000"},"17-956":{"d":"INFANT WARMER","t":"17956-000"},"18-108":{"d":"MRI SYSTEM","t":"18108-000"},"18-231":{"d":"ESU MONOPOLAR/BIPOLAR","t":"18231-000"},"CIV000100":{"d":"HOSPITAL BLOCK","t":"C62003"},"INVENTORY MECHANICAL":{"d":"N/A","t":"M-N/A"},"INVENTORY ELECTRICAL":{"d":"N/A","t":"E-N/A"},"NOT AVAILABLE":{"d":"NOT AVAILABLE","t":"NOT AVAILABLE"}};
+
+const parseDept=(c)=>{if(!c)return"";const p=c.split("-");if(p.length<3)return"";return c.replace(p[0]+"-","").replace("-"+p[p.length-1],"")};
+const lKeys=Object.keys(LM).sort();
+const tKeys=Object.keys(EM).sort();
+const PPM=["Monthly","Quarterly","Half Yearly","Yearly","2 Years","3 Years","As Required"];
+
+const FB={
+  u:"https://fnbjkb-4727b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  async ga(){try{const r=await fetch(this.u+"/assets.json");const d=await r.json();if(!d)return[];return Object.entries(d).map(([i,v])=>({id:i,...v}))}catch{return null}},
+  async cr(r){try{const p={...r,ca:new Date().toISOString()};const res=await fetch(this.u+"/assets.json",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});const d=await res.json();return{id:d.name,...p}}catch{return null}},
+  async up(i,r){try{await fetch(this.u+"/assets/"+i+".json",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(r)});return true}catch{return false}},
+  async rm(i){try{await fetch(this.u+"/assets/"+i+".json",{method:"DELETE"});return true}catch{return false}},
+};
+
+const Ic={
+  plus:<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>,
+  edit:<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>,
+  trash:<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>,
+  search:<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>,
+  close:<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>,
+  ck:<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>,
+  xx:<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>,
+  fire:<svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 23c-4.97 0-9-3.58-9-8 0-3.19 2.13-6.17 3.38-7.54A1 1 0 018 7.82c.13 1.63.89 2.65 1.53 3.19.1-.93.51-2.26 1.68-3.64C12.6 5.65 12.31 3.26 12.07 2a1 1 0 011.61-.81C15.61 2.63 21 6.84 21 15c0 4.42-4.03 8-9 8z" fill="#f97316"/><path d="M12 23c-2.76 0-5-1.79-5-4 0-2.09 1.28-3.48 2.34-4.32a.5.5 0 01.8.44c-.05.8.15 1.49.5 1.96.17-.71.64-1.56 1.43-2.31.39-.37.45-.66.44-1.27a.5.5 0 01.84-.38C14.64 13.28 17 15.34 17 19c0 2.21-2.24 4-5 4z" fill="#fbbf24"/></svg>,
+  dl:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  rf:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>,
+};
+const Bd=({v})=><span className={"badge "+(v==="Yes"?"by":"bn")}>{v==="Yes"?Ic.ck:Ic.xx} {v}</span>;
+
+const E0={locationCode:"",area:"",department:"",equipmentName:"",equipmentDescription:"",assetGroup:"",purchaseCost:"",tncForm:"No",kewpa:"No",lpo:"No",cert:"No",assetNo:"",typeCode:"",taskCode:"",manufacturer:"",serialNo:"",brand:"",model:"",bumi:"",bumiContact:"",vendor:"",vendorContact:"",noLPO:"",warrantyStart:"",warrantyEnd:"",ppmFrequency:"",contractEdgenta:"No"};
+
+function App(){
+  const[as,sAs]=useState([]);const[ld,sLd]=useState(true);const[vw,sVw]=useState("list");const[eId,sEId]=useState(null);const[fm,sFm]=useState({...E0});const[sr,sSr]=useState("");const[ts,sTs]=useState(null);const[dId,sDId]=useState(null);const[se,sSe]=useState(false);
+  const fl=(m,t="success")=>{sTs({m,t});setTimeout(()=>sTs(null),3e3)};
+  const F=(k,v)=>sFm(p=>({...p,[k]:v}));
+
+  const hLC=(c)=>{const a=LM[c]||"";const dc=parseDept(c);const d=DM[dc]||dc;sFm(p=>({...p,locationCode:c,area:a,department:d}))};
+  const hTC=(c)=>{const e=EM[c];sFm(p=>({...p,typeCode:c,equipmentDescription:e?e.d:"",taskCode:e?e.t:""}))};
+
+  useEffect(()=>{FB.ga().then(d=>{if(d)sAs(d);else fl("Firebase error","error");sLd(false)})},[]);
+  const rl=async()=>{sLd(true);const d=await FB.ga();if(d)sAs(d);sLd(false)};
+
+  const hSub=async()=>{
+    if(!fm.locationCode||!fm.equipmentName){fl("Isi Location & Equipment","error");return}
+    sLd(true);const p={...fm,purchaseCost:Number(fm.purchaseCost)||0};
+    if(eId){(await FB.up(eId,p))?fl("Dikemaskini"):fl("Gagal","error")}
+    else{const r=await FB.cr(p);r?fl("Didaftarkan"):fl("Gagal","error")}
+    await rl();sFm({...E0});sEId(null);sVw("list");sLd(false)
+  };
+  const hEd=(a)=>{sFm({...E0,...a});sEId(a.id);sVw("form")};
+  const hDl=async(id)=>{sLd(true);(await FB.rm(id))?fl("Dipadam"):fl("Gagal","error");sDId(null);await rl();sLd(false)};
+
+  const ft=useMemo(()=>as.filter(a=>{const q=sr.toLowerCase();return!q||[a.id,a.locationCode,a.area,a.department,a.equipmentName,a.assetNo,a.typeCode,a.brand,a.model,a.serialNo,a.vendor,a.bumi].some(f=>(f||"").toLowerCase().includes(q))}),[as,sr]);
+  const tc=ft.reduce((s,a)=>s+(a.purchaseCost||0),0);
+
+  const HD=["ID","Location","Area","Dept","Equipment","Desc","Group","Cost","AssetNo","TypeCode","TaskCode","Manufacturer","SerialNo","Brand","Model","Bumi","BumiContact","Vendor","VendorContact","NoLPO","WtyStart","WtyEnd","PPM","Edgenta","T&C","KEWPA","LPO","Cert"];
+  const tR=(a)=>[(a.id||"").slice(-8),a.locationCode,a.area,a.department,a.equipmentName,a.equipmentDescription,a.assetGroup,a.purchaseCost||0,a.assetNo,a.typeCode,a.taskCode,a.manufacturer,a.serialNo,a.brand,a.model,a.bumi,a.bumiContact,a.vendor,a.vendorContact,a.noLPO,a.warrantyStart,a.warrantyEnd,a.ppmFrequency,a.contractEdgenta,a.tncForm,a.kewpa,a.lpo,a.cert];
+  const dt=()=>new Date().toISOString().slice(0,10);
+  const eXl=()=>{try{const w=XLSX.utils.book_new();XLSX.utils.book_append_sheet(w,XLSX.utils.aoa_to_sheet([HD,...ft.map(tR)]),"Aset");XLSX.writeFile(w,"VO_"+dt()+".xlsx");fl("Excel OK")}catch{fl("Fail","error")}};
+  const eCs=()=>{try{const c=[HD,...ft.map(tR)].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n");const b=new Blob(["\uFEFF"+c],{type:"text/csv"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="VO_"+dt()+".csv";a.click();fl("CSV OK")}catch{fl("Fail","error")}};
+  const ePf=()=>{try{const{jsPDF}=window.jspdf;const d=new jsPDF({orientation:"landscape",format:"a3"});d.setFontSize(13);d.text("Variation Order - Senarai Aset",14,14);d.setFontSize(7);d.text("Tarikh: "+new Date().toLocaleDateString("ms-MY")+" | "+ft.length+" rekod | RM "+tc.toLocaleString(),14,20);d.autoTable({startY:24,head:[HD],body:ft.map(tR),styles:{fontSize:5,cellPadding:1.2},headStyles:{fillColor:[249,115,22],fontSize:4.5},margin:{left:6,right:6}});d.save("VO_"+dt()+".pdf");fl("PDF OK")}catch{fl("Fail","error")}};
+
+  if(ld&&!as.length)return<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",flexDirection:"column",gap:14}}>{Ic.fire}<div style={{fontSize:13,color:"var(--muted)"}}>Menyambung Firebase...</div><div className="lb-bar" style={{width:180,borderRadius:4}}/></div>;
+
+  const renderForm=()=>(
+    <div style={{padding:18,maxHeight:"calc(100vh - 100px)",overflowY:"auto"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:6}}>
+        <div><h2 style={{fontSize:15,fontWeight:800}}>{eId?"Kemaskini":"Daftar Baru"}</h2>{eId&&<span className="mono" style={{fontSize:10,color:"var(--accent)"}}>{eId}</span>}</div>
+        <button className="btn bg" onClick={()=>{sVw("list");sEId(null);sFm({...E0})}}>{Ic.close} Batal</button>
+      </div>
+
+      <div className="st2">📍 Lokasi (Auto-fill Area & Dept)</div>
+      <div className="g2">
+        <div><label className="lb">Location Code *</label><select className="fi" value={fm.locationCode} onChange={e=>hLC(e.target.value)}><option value="">— Pilih —</option>{lKeys.map(k=><option key={k} value={k}>{k}</option>)}</select><div className="af">Pilih → Area & Department auto</div></div>
+        <div><label className="lb">Area</label><input className="fi" value={fm.area} readOnly style={{background:"#0a0a1a",color:"var(--yellow)"}}/></div>
+        <div><label className="lb">Department</label><input className="fi" value={fm.department} readOnly style={{background:"#0a0a1a",color:"var(--yellow)"}}/></div>
+      </div>
+
+      <div className="st2" style={{marginTop:16}}>🔧 Peralatan (Auto-fill Desc & Task)</div>
+      <div className="g2">
+        <div><label className="lb">Equipment Name *</label><input className="fi" value={fm.equipmentName} onChange={e=>F("equipmentName",e.target.value)}/></div>
+        <div><label className="lb">Asset No</label><input className="fi mono" value={fm.assetNo} onChange={e=>F("assetNo",e.target.value)}/></div>
+        <div><label className="lb">Type Code</label><select className="fi" value={fm.typeCode} onChange={e=>hTC(e.target.value)}><option value="">— Pilih —</option>{tKeys.map(k=><option key={k} value={k}>{k} - {EM[k].d.slice(0,35)}</option>)}</select><div className="af">Pilih → Description & Task auto</div></div>
+        <div><label className="lb">Description</label><input className="fi" value={fm.equipmentDescription} readOnly style={{background:"#0a0a1a",color:"var(--yellow)"}}/></div>
+        <div><label className="lb">Task Code</label><input className="fi mono" value={fm.taskCode} readOnly style={{background:"#0a0a1a",color:"var(--green)"}}/></div>
+        <div><label className="lb">Asset Group</label><select className="fi" value={fm.assetGroup} onChange={e=>F("assetGroup",e.target.value)}><option value="">—</option><option>Mekanikal</option><option>Elektrikal</option></select></div>
+        <div><label className="lb">Cost (RM)</label><input className="fi" type="number" value={fm.purchaseCost} onChange={e=>F("purchaseCost",e.target.value)}/></div>
+      </div>
+
+      <div className="st2" style={{marginTop:16}}>🏭 Pengeluar & Jenama</div>
+      <div className="g3">
+        <div><label className="lb">Manufacturer</label><input className="fi" value={fm.manufacturer} onChange={e=>F("manufacturer",e.target.value)}/></div>
+        <div><label className="lb">Brand</label><input className="fi" value={fm.brand} onChange={e=>F("brand",e.target.value)}/></div>
+        <div><label className="lb">Model</label><input className="fi" value={fm.model} onChange={e=>F("model",e.target.value)}/></div>
+        <div><label className="lb">Serial No.</label><input className="fi mono" value={fm.serialNo} onChange={e=>F("serialNo",e.target.value)}/></div>
+      </div>
+
+      <div className="st2" style={{marginTop:16}}>🤝 Vendor & Bumi</div>
+      <div className="g3">
+        <div><label className="lb">Bumi</label><input className="fi" value={fm.bumi} onChange={e=>F("bumi",e.target.value)}/></div>
+        <div><label className="lb">Bumi Contact</label><input className="fi" value={fm.bumiContact} onChange={e=>F("bumiContact",e.target.value)}/></div>
+        <div><label className="lb">Vendor</label><input className="fi" value={fm.vendor} onChange={e=>F("vendor",e.target.value)}/></div>
+        <div><label className="lb">Vendor Contact</label><input className="fi" value={fm.vendorContact} onChange={e=>F("vendorContact",e.target.value)}/></div>
+        <div><label className="lb">No LPO</label><input className="fi" value={fm.noLPO} onChange={e=>F("noLPO",e.target.value)}/></div>
+      </div>
+
+      <div className="st2" style={{marginTop:16}}>📅 Warranty & PPM</div>
+      <div className="g3">
+        <div><label className="lb">Warranty Start</label><input className="fi" type="date" value={fm.warrantyStart} onChange={e=>F("warrantyStart",e.target.value)}/></div>
+        <div><label className="lb">Warranty End</label><input className="fi" type="date" value={fm.warrantyEnd} onChange={e=>F("warrantyEnd",e.target.value)}/></div>
+        <div><label className="lb">PPM Frequency</label><select className="fi" value={fm.ppmFrequency} onChange={e=>F("ppmFrequency",e.target.value)}><option value="">—</option>{PPM.map(f=><option key={f}>{f}</option>)}</select></div>
+        <div><label className="lb">Contract Edgenta</label><select className="fi" value={fm.contractEdgenta} onChange={e=>F("contractEdgenta",e.target.value)}><option>No</option><option>Yes</option></select></div>
+      </div>
+
+      <div className="ds">
+        <div className="st2" style={{borderBottom:"none",marginBottom:6}}>📄 Dokumen</div>
+        <div className="g4">
+          {[{k:"tncForm",l:"T&C"},{k:"kewpa",l:"KEW.PA"},{k:"lpo",l:"LPO"},{k:"cert",l:"Cert"}].map(({k,l})=>(
+            <div key={k}><label className="lb">{l}</label><select className="fi" value={fm[k]} onChange={e=>F(k,e.target.value)}><option>No</option><option>Yes</option></select></div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{marginTop:18,display:"flex",gap:8}}>
+        <button className="btn bp" style={{padding:"10px 28px"}} onClick={hSub} disabled={ld}>{ld?"...":eId?"Kemaskini":"Daftar"}</button>
+        <button className="btn bg" onClick={()=>{sFm({...E0});sEId(null)}}>Reset</button>
+      </div>
+    </div>
+  );
+
+  const renderList=()=>(
+    <React.Fragment>
+      <div className="tb">
+        <div className="sb">{Ic.search}<input placeholder="Cari..." value={sr} onChange={e=>sSr(e.target.value)}/></div>
+        <div className="st"><strong style={{color:"var(--text)"}}>{ft.length}</strong> rekod</div>
+        <div className="st">RM <strong style={{color:"var(--accent)"}}>{tc.toLocaleString()}</strong></div>
+        <button className="btn bg" style={{fontSize:9,padding:"6px 10px"}} onClick={rl}>{Ic.rf}</button>
+        <div style={{position:"relative"}}>
+          <button className="btn bg" style={{fontSize:9,padding:"6px 10px"}} onClick={()=>sSe(!se)}>{Ic.dl} Export</button>
+          {se&&<div style={{position:"absolute",top:"calc(100% + 3px)",right:0,zIndex:50,background:"var(--card)",border:"1px solid var(--border)",borderRadius:8,padding:3,minWidth:140,boxShadow:"0 10px 25px rgba(0,0,0,.5)"}}>
+            {[{l:"📊 Excel",f:eXl},{l:"📄 PDF",f:ePf},{l:"📋 CSV",f:eCs},{l:"⚡ Semua",f:()=>{eXl();ePf();eCs()}}].map(({l,f})=>(
+              <button key={l} className="btn" style={{width:"100%",justifyContent:"flex-start",padding:"7px 10px",background:"transparent",color:"var(--text)",borderRadius:5,fontSize:10}} onMouseEnter={e=>e.currentTarget.style.background="#ffffff08"} onMouseLeave={e=>e.currentTarget.style.background="transparent"} onClick={()=>{f();sSe(false)}}>{l}</button>
+            ))}
+          </div>}
+        </div>
+        <button className="btn bp" style={{fontSize:10,padding:"7px 14px"}} onClick={()=>{sFm({...E0});sEId(null);sVw("form")}}>{Ic.plus} Daftar</button>
+      </div>
+      {ld&&<div className="lb-bar"/>}
+      <div className="tw">
+        <table>
+          <thead><tr>
+            {["#","Location","Area","Dept","Equipment","Type","Asset No","Brand/Model","S/N","RM","Vendor","Bumi","PPM","Edg","T&C","KEW","LPO","Crt",""].map(h=><th key={h}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {!ft.length&&<tr><td colSpan={19} style={{textAlign:"center",color:"var(--dim)",padding:36}}>{ld?"Memuatkan...":"Tiada rekod"}</td></tr>}
+            {ft.map((a,i)=>(
+              <tr key={a.id} className="rh" style={{background:i%2?"#0f0f2344":"transparent"}}>
+                <td className="mono" style={{fontWeight:800,color:"var(--accent)",fontSize:9}}>{(a.id||"").slice(-5)}</td>
+                <td className="mono" style={{fontSize:9,whiteSpace:"nowrap"}}>{a.locationCode}</td>
+                <td className="el" style={{maxWidth:100,fontSize:10}}>{a.area}</td>
+                <td className="el" style={{maxWidth:80,fontSize:9}}>{a.department}</td>
+                <td style={{fontWeight:600,fontSize:10}}>{a.equipmentName}</td>
+                <td><span className="tag">{a.typeCode||"-"}</span></td>
+                <td className="mono" style={{fontSize:9}}>{a.assetNo||"-"}</td>
+                <td className="el" style={{maxWidth:80,fontSize:9}}>{[a.brand,a.model].filter(Boolean).join("/")||"-"}</td>
+                <td className="mono" style={{fontSize:9}}>{a.serialNo||"-"}</td>
+                <td className="mono" style={{fontWeight:700,color:"var(--yellow)",fontSize:10}}>{(a.purchaseCost||0).toLocaleString()}</td>
+                <td className="el" style={{maxWidth:70,fontSize:9}}>{a.vendor||"-"}</td>
+                <td className="el" style={{maxWidth:70,fontSize:9}}>{a.bumi||"-"}</td>
+                <td style={{fontSize:9}}>{a.ppmFrequency||"-"}</td>
+                <td><Bd v={a.contractEdgenta||"No"}/></td>
+                <td><Bd v={a.tncForm||"No"}/></td>
+                <td><Bd v={a.kewpa||"No"}/></td>
+                <td><Bd v={a.lpo||"No"}/></td>
+                <td><Bd v={a.cert||"No"}/></td>
+                <td style={{whiteSpace:"nowrap"}}>
+                  <button className="btn" style={{padding:"3px 6px",background:"#3b82f618",color:"var(--blue)",marginRight:2}} onClick={()=>hEd(a)}>{Ic.edit}</button>
+                  <button className="btn" style={{padding:"3px 6px",background:"#ef444418",color:"var(--red)"}} onClick={()=>sDId(a.id)}>{Ic.trash}</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </React.Fragment>
+  );
+
+  return(
+    <div style={{padding:"14px 8px"}}>
+      <div style={{maxWidth:1500,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {Ic.fire}
+          <div>
+            <div style={{fontSize:16,fontWeight:800}}><span style={{color:"var(--accent)"}}>Variation Order</span> — Pendaftaran Aset</div>
+            <div style={{fontSize:9,color:"var(--muted)",letterSpacing:2,textTransform:"uppercase"}}>Auto-fill Location & Type Code</div>
+          </div>
+        </div>
+        <div className="st" style={{border:"1px solid #33415522",fontSize:9}}>
+          <span style={{width:6,height:6,borderRadius:"50%",background:"var(--accent)",boxShadow:"0 0 6px var(--accent)",display:"inline-block"}}/>🔥 Firebase
+        </div>
+      </div>
+      <div className="glass" style={{maxWidth:1500,margin:"0 auto",overflow:"hidden",animation:"fadeUp .4s ease"}}>
+        {vw==="list"?renderList():renderForm()}
+      </div>
+      {dId&&<div className="ov" onClick={()=>sDId(null)}><div className="md" onClick={e=>e.stopPropagation()}>
+        <h3 style={{fontSize:14,marginBottom:6}}>Padam?</h3>
+        <p style={{color:"var(--muted)",fontSize:11,marginBottom:16}}>Padam <strong className="mono" style={{color:"var(--red)"}}>{String(dId).slice(-6)}</strong>?</p>
+        <div style={{display:"flex",gap:6,justifyContent:"flex-end"}}>
+          <button className="btn bg" onClick={()=>sDId(null)}>Batal</button>
+          <button className="btn bd" onClick={()=>hDl(dId)}>Padam</button>
+        </div>
+      </div></div>}
+      {ts&&<div className="tst" style={{background:ts.t==="error"?"#dc2626":"#16a34a"}}>{ts.m}</div>}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
